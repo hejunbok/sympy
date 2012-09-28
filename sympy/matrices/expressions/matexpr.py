@@ -200,6 +200,16 @@ class MatrixExpr(Expr):
     def diff(self, x):
         return self._eval_derivative(x)
 
+    def fix(self, x):
+        g = 0
+        for arg in self.as_ordered_terms():
+            if arg.has(MatrixDerivative(x.T)):
+                newTerm = arg.T
+            else:
+                newTerm = arg
+            g += newTerm
+        return g.subs(MatrixDerivative(x),1)
+
 class MatrixSymbol(MatrixExpr, Symbol):
     """Symbolic representation of a Matrix object
 
@@ -218,8 +228,9 @@ class MatrixSymbol(MatrixExpr, Symbol):
     is_MatrixSymbol = True
 
     def __new__(cls, name, n, m):
-        n, m = sympify(n), sympify(m)
-        obj = Basic.__new__(cls, name, n, m)
+        obj = Basic.__new__(cls)
+        obj._shape = (n, m)
+        obj._name = name
         return obj
 
     def _hashable_content(self):
@@ -227,11 +238,11 @@ class MatrixSymbol(MatrixExpr, Symbol):
 
     @property
     def shape(self):
-        return self.args[1:3]
+        return self._shape
 
     @property
     def name(self):
-        return self.args[0]
+        return self._name
 
     def _eval_subs(self, old, new):
         # only do substitutions in shape
