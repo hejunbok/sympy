@@ -29,7 +29,7 @@ class Symbol(AtomicExpr, Boolean):
 
     is_comparable = False
 
-    __slots__ = ['name']
+    __slots__ = ['name', 'shape']
 
     is_Symbol = True
 
@@ -47,7 +47,7 @@ class Symbol(AtomicExpr, Boolean):
         """
         return True
 
-    def __new__(cls, name, **assumptions):
+    def __new__(cls, name, shape=(1,1), **assumptions):
         """Symbols are identified by name and assumptions::
 
         >>> from sympy import Symbol
@@ -64,16 +64,17 @@ class Symbol(AtomicExpr, Boolean):
                 useinstead="Dummy() or symbols(..., cls=Dummy)"
                 ).warn()
             if assumptions.pop('dummy'):
-                return Dummy(name, **assumptions)
+                return Dummy(name, shape, **assumptions)
         if assumptions.get('zero', False):
             return S.Zero
         assumptions.setdefault('commutative', True)
-        return Symbol.__xnew_cached_(cls, name, **assumptions)
+        return Symbol.__xnew_cached_(cls, name, shape, **assumptions)
 
-    def __new_stage2__(cls, name, **assumptions):
+    def __new_stage2__(cls, name, shape=(1,1), **assumptions):
         assert isinstance(name, str),repr(type(name))
         obj = Expr.__new__(cls, **assumptions)
         obj.name = name
+        obj.shape = shape
         return obj
 
     __xnew__       = staticmethod(__new_stage2__)            # never cached (e.g. dummy)
@@ -143,12 +144,12 @@ class Dummy(Symbol):
 
     is_Dummy = True
 
-    def __new__(cls, name=None, **assumptions):
+    def __new__(cls, name=None, shape=(1,1), **assumptions):
         if name is None:
             name = str(Dummy._count)
 
         assumptions.setdefault('commutative', True)
-        obj = Symbol.__xnew__(cls, name, **assumptions)
+        obj = Symbol.__xnew__(cls, name, shape, **assumptions)
 
         Dummy._count += 1
         obj.dummy_index = Dummy._count
