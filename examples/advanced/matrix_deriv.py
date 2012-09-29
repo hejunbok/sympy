@@ -1,13 +1,24 @@
 #!/usr/bin/env python
 from sympy import *
+from sympy.abc import m,n
 
-A = MatrixSymbol('A',3,3)
-C = MatrixSymbol('C',3,3)
-D = MatrixSymbol('D',3,3)
-x = MatrixSymbol('x',3,1)
-b = MatrixSymbol('b',3,1)
-e = MatrixSymbol('e',3,1)
+A = MatrixSymbol('A',n,n)
+C = MatrixSymbol('C',n,n)
+D = MatrixSymbol('D',n,n)
+x = MatrixSymbol('x',n,1)
+b = MatrixSymbol('b',n,1)
+e = MatrixSymbol('e',n,1)
+a = MatrixSymbol('a',n,1)
 
-pprint(diff(x.T*A*x,x).fix(x))
-a = (A*x+b).T*C*(D*x+e)
-print diff(a,x).fix(x)
+exps = [x.T*A*x,
+        (A*x+b).T*C*(D*x+e),
+        #a.T*x*x.T*b
+       ]
+for exp in exps:
+    print
+    print 'exp'
+    pprint(exp)
+    print 'diff'
+    pprint(diff(exp,x))
+    print 'diff fix'
+    pprint(diff(exp,x).fix(x))
